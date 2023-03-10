@@ -1,0 +1,9 @@
+/build/**
+!/build/.gitkeep
+
+/soft/datax
+/soft/python
+/soft/python-source
+
+/logs/**
+!/logs/.gitkeep

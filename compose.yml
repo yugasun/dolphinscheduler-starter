@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_NAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_USER}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - "./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - "./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/5432"]
+      interval: 5s
+      timeout: 60s
+      retries: 120
+
+  # oracle:
+  #   # https://hub.docker.com/r/yugasun/oracle-xe
+  #   image: yugasun/oracle-xe:11
+  #   container_name: oracle
+  #   environment:
+  #     ORACLE_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - "./oracle/docker-entrypoint-initdb.d:/container-entrypoint-initdb.d"
+  #   ports:
+  #     - "15210:1521"
+
+  dolphinscheduler-schema-initializer:
+    image: apache/dolphinscheduler-tools:${DOLPHINSCHEDULER_VERSION}
+    container_name: dolphinscheduler-schema-initializer
+    environment:
+      DATABASE: postgresql
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    # command: [ tools/bin/upgrade-schema.sh ]
+    command: [ tail -f /dev/null ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dolphinscheduler:
+    image: yugasun/dolphinscheduler-standalone-server
+    container_name: dolphinscheduler
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "12345:12345"
+      - "25333:25333"
+    volumes:
+      - "./conf/dolphinscheduler_env.sh:/opt/dolphinscheduler/standalone-server/conf/dolphinscheduler_env.sh"
+      - "./soft:/opt/soft"
+      - "./logs:/opt/dolphinscheduler/logs"
+    # command: tail -f /dev/null
+    depends_on:
+      - dolphinscheduler-schema-initializer
+
+networks:
+  default:
+    name: etl
+    external: true
