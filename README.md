@@ -1,5 +1,7 @@
 ## DolphinScheduler Starter
 
+Run [Apache DolphinScheduler](https://dolphinscheduler.apache.org/) by standalone mode easily.
+
 ### Usage
 
 Run:
