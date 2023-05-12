@@ -40,15 +40,7 @@ Then we can build docker image by locally:
 
 #### Build for multiple platform
 
-Before we build for multiple platform, we should create buildx environment:
-
-```shell
-docker buildx create --name multiarch
-docker buildx use multiarch
-docker buildx inspect multiarch --bootstrap
-```
-
-Then we can also build for multi platform image and push to docker hub:
+We can also build for multi platform image and push to docker hub:
 
 ```shell
 ./cli.sh push

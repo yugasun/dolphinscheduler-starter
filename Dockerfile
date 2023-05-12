@@ -1,6 +1,8 @@
 FROM eclipse-temurin:8-jdk-focal
 
-ENV DOLPHINSCHEDULER_VERSION 3.1.4
+ARG VERSION=3.1.5
+
+ENV VERSION $VERSION
 ENV DOCKER true
 ENV TZ Asia/Shanghai
 ENV DS_HOME /opt/dolphinscheduler
@@ -12,7 +14,7 @@ RUN apt update ; \
 
 WORKDIR $DS_HOME
 
-ADD ./build/apache-dolphinscheduler-${DOLPHINSCHEDULER_VERSION}-bin $DS_HOME
+ADD ./build/apache-dolphinscheduler-${VERSION}-bin $DS_HOME
 
 COPY ./build/jdbc/* $DS_HOME/alert-server/libs/
 COPY ./build/jdbc/* $DS_HOME/api-server/libs/

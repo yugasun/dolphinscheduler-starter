@@ -3068,7 +3068,7 @@ COPY public.t_ds_user (id, user_name, user_password, user_type, email, phone, te
 --
 
 COPY public.t_ds_version (id, version) FROM stdin;
-1	3.1.4
+1	3.1.5
 \.
 
 

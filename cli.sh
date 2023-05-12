@@ -11,15 +11,15 @@ if [ $# -le 0 ]; then
   abort $usage
 fi
 
-command=$1
-shift
-version=$1
-shift
-
 BIN_DIR=`dirname $0`
 BIN_DIR=`cd "$BIN_DIR"; pwd`
 
 source $BIN_DIR/.env
+
+command=$1
+shift
+version=${1:-$DOLPHINSCHEDULER_VERSION}
+shift
 
 COMPOSE_COMMAND="docker-compose"
 OS=$(uname)
@@ -31,12 +31,14 @@ else
   abort "Only supported on macOS and Linux."
 fi
 
+IMAGE_NAME=yugasun/dolphinscheduler-standalone-server:$DOLPHINSCHEDULER_VERSION
+
 case $command in
-  # ./cli.sh download 3.1.4
+  # ./cli.sh init
   (init)
     echo "Download latest dolphinscheduler..."
     FILE_NAME=apache-dolphinscheduler-$version-bin.tar.gz
-    wget -O $BIN_DIR/build https://dlcdn.apache.org/dolphinscheduler/$version/$FILE_NAME
+    wget -O $BIN_DIR/build/$FILE_NAME https://dlcdn.apache.org/dolphinscheduler/$version/$FILE_NAME
     echo "Unzipping $FILE_NAME"
     tar -xzf $BIN_DIR/build/$FILE_NAME -C $BIN_DIR/build
     ;;
@@ -51,15 +53,16 @@ case $command in
 
   (build)
     echo "Building docker image locally..."
-    docker build --tag yugasun/dolphinscheduler-standalone-server .
+    docker build --build-arg VERSION=$version --tag $IMAGE_NAME .
     ;;
 
   (push)
     echo "Build and push docker image to docker.io..."
-    # docker buildx create --name multiarch
-    # docker buildx use multiarch
-    # docker buildx inspect multiarch --bootstrap
-    docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag yugasun/dolphinscheduler-standalone-server .
+    BUILDX_NAME=multiarch
+    docker buildx ls|grep $BUILDX_NAME > /dev/null || docker buildx create --name $BUILDX_NAME
+    docker buildx use multiarch
+    docker buildx inspect multiarch --bootstrap
+    docker buildx build --build-arg VERSION=$version --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag $IMAGE_NAME .
     ;;
     
   (start)
