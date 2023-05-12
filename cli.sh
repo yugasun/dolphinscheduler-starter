@@ -66,7 +66,7 @@ case $command in
     echo "Starting compose services..."
     NET_NAME=etl
     docker network ls|grep $NET_NAME > /dev/null || docker network create --driver bridge $NET_NAME
-    # $COMPOSE_COMMAND up -d
+    $COMPOSE_COMMAND up -d
     ;;
 
   (*)

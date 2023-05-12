@@ -10,7 +10,7 @@ Run:
 ./cli.sh start
 ```
 
-Access DolphinScheduler UI by: http://localhost:12345/dolphinscheduler/ui
+Access DolphinScheduler UI by: http://localhost:12345/dolphinscheduler/ui. The default username and password are `admin/dolphinscheduler123`
 
 > Notice: we can customize DolphinScheduler environment variables by `conf/dolphinscheduler_env.sh`.
 
