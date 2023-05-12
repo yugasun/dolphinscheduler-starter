@@ -69,6 +69,11 @@ case $command in
     $COMPOSE_COMMAND up -d
     ;;
 
+  (stop)
+    echo "Stoping compose services..."
+    $COMPOSE_COMMAND down
+    ;;
+
   (*)
     abort $usage
     ;;
